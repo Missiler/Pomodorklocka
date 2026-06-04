@@ -12,10 +12,23 @@ class menu_manager{
         void init();
         void update();
         void changeMenu();
+        void buttonAction(uint8_t button);
+        void nextAction(uint8_t action);
+
+        enum class MenuState {
+            initialState,
+            mainMenu,
+            settings,
+            running,
+            finished
+        };
+
+
 
     private:
         Adafruit_SSD1306 &display; // Your private variable is named 'display'
         int updateNumber = 0;       // Make sure this is declared here so updateNumber++ works!
+        MenuState cuurentState = MenuState::initialState;
 };
 
 

@@ -19,6 +19,10 @@ void menu_manager::init() {
     display.display();
 }
 
+void menu_manager::nextAction(uint8_t action){
+    
+}
+
 void menu_manager::update() {
     display.clearDisplay();
     
@@ -29,13 +33,14 @@ void menu_manager::update() {
     display.setCursor(0, 0); // Start at top-left corner
     display.println(F("Update!"));
     
-    // Display your changing variable
-    display.print(F("Tick: "));
-    display.println(updateNumber);
-    updateNumber++;
     display.display();
+
 }
 
 void menu_manager::changeMenu() {
     // Code to change the menu here
+}
+
+void menu_manager::buttonAction(uint8_t button){
+
 }
