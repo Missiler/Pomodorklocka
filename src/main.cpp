@@ -36,16 +36,14 @@ menu_manager menu(display);
 //Interrupts for buttons:
 void confirmISR() {
     confirmButton.handleInterrupt(); // Redirects the hardware alert to the object
+    menu.buttonAction(1);
 
 }
 
 void backISR() {
     backButton.handleInterrupt();    // Redirects the hardware alert to the object
+    menu.buttonAction(2);
 
-}
-
-void onTimerTick() {
-    menu.update();
 }
 
 //Piezo:
@@ -68,6 +66,6 @@ void setup() {
 
 
 void loop() {
-    menu.update();
-
+    unsigned long currentMillis = millis();
+    menu.update(currentMillis);
 }
