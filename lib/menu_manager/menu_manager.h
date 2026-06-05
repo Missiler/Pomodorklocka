@@ -11,7 +11,7 @@ class menu_manager{
         //Actions that is used in the main code.
         menu_manager(Adafruit_SSD1306 &displayRef);
         void init();
-        void update(unsigned long currentMillis);
+        void update(unsigned long currentMillis, int potVal);
         void changeMenu();
         void buttonAction(uint8_t button);
         void nextAction(uint8_t action);
@@ -32,15 +32,18 @@ class menu_manager{
         void finishedFunction();
 
         //Functions that are internal for the menu manager.
-        
+        void selectionManager();
+        void menuPositionManager();
 
 
 
     private:
         Adafruit_SSD1306 &display; // Your private variable is named 'display'
         int updateNumber = 0;       // Make sure this is declared here so updateNumber++ works!
+        int potentioValue_raw = 0;
+        float menuPosition = 0.0; //The position of the potentiometer to select options.
         MenuState currentState = MenuState::initialState;
-        MenuState nextState = MenuState::initialState;
+        volatile MenuState nextState = MenuState::initialState;
 };
 
 

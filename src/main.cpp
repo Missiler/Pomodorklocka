@@ -64,8 +64,17 @@ void setup() {
       menu.init();
 }
 
+unsigned long lastUpdate = 0;
+const unsigned long refreshInterval = 100; // Update screen every 100ms
 
 void loop() {
-    unsigned long currentMillis = millis();
-    menu.update(currentMillis);
+    
+unsigned long currentMillis = millis();
+    
+    if (currentMillis - lastUpdate >= refreshInterval) {
+        lastUpdate = currentMillis;
+        
+        potVal = analogRead(potentiometerPin);
+        menu.update(currentMillis, potVal);
+    }
 }
