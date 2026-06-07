@@ -20,12 +20,14 @@ class menu_manager {
             MainMenu,
             Settings,
             Vault,
-            Running,
+            Running,        
+            RunningBreak,   
             Finished,
             VolumeChange,
-            TimerChange,
-            BreakTimeChange,
-            Count // Automatically equals total number of states
+            TimerChange,     // Row 1: Focus Time adjustment
+            BreakTimeChange, // Row 2: Break Time adjustment
+            TimerConfirm,    // Summary/Confirmation View Screen
+            Count
         };
         
         // Bundles everything unique to a menu view
@@ -48,6 +50,9 @@ class menu_manager {
         void selectionManager();
         void menuPositionManager();
 
+        void timerChangeFunction();
+        void timerConfirmFunction();
+
     private:
         Adafruit_SSD1306 &display;
         int updateNumber = 0;       
@@ -58,6 +63,17 @@ class menu_manager {
 
         // Configuration table instance array
         static const StateConfig stateTable[];
+
+        //Timer 
+        // Configuration Settings Storage
+        int configuredWorkSeconds  = 300;  // Default: 5 minutes
+        int configuredBreakSeconds = 60;   // Default: 1 minute
+
+        // Active Loop Tracker Variables
+        int totalTimerSeconds = 0;         // Tracks the currently active view setting
+        int remainingSeconds = 0;          // Shared structural tracking register
+        unsigned long timerLastMillis = 0;
+        bool editingBreakTime = false;
 };
 
 #endif
