@@ -4,6 +4,7 @@
 #include <Arduino.h>
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
+#include <BitmapBank.h>
 
 class menu_manager {
     public:
@@ -52,6 +53,24 @@ class menu_manager {
 
         void timerChangeFunction();
         void timerConfirmFunction();
+        struct AnimationInstance {
+            DisplayAsset id;
+            unsigned long lastFrameUpdateTime = 0;
+            int currentFrameIndex = 0;
+            int x = 0;
+            int y = 0;
+
+            // Reset helper for when you switch assets on the fly
+            void changeAsset(DisplayAsset newId, int posX, int posY) {
+                id = newId;
+                x = posX;
+                y = posY;
+                currentFrameIndex = 0;
+                lastFrameUpdateTime = 0;
+            }
+        };
+
+        void drawDisplay(AnimationInstance& instance);
 
     private:
         Adafruit_SSD1306 &display;
@@ -74,6 +93,18 @@ class menu_manager {
         int remainingSeconds = 0;          // Shared structural tracking register
         unsigned long timerLastMillis = 0;
         bool editingBreakTime = false;
+
+        //Animation
+        int currentFrameIndex = 0;
+        unsigned long lastFrameUpdateTime = 0;
+        AnimationInstance coinInstance;
+        menu_manager::AnimationInstance vaultAssetInstance; // <-- ADD THIS LINE
+
+        menu_manager::AnimationInstance mainMenuAssetInstance1; // <-- ADD THIS LINE
+        menu_manager::AnimationInstance mainMenuAssetInstance2; // <-- ADD THIS LINE
+        menu_manager::AnimationInstance mainMenuAssetInstance3; // <-- ADD THIS LINE
+    
+        menu_manager::AnimationInstance runningAssetInstance;
 };
 
 #endif
