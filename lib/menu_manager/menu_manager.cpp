@@ -24,7 +24,7 @@ const menu_manager::StateConfig menu_manager::stateTable[] = {
       
     // [MainMenu] -> Index 1 ("Start") now shifts directly into the [TimerConfirm] step screen
     { mainOpts, GET_SIZE(mainOpts), &menu_manager::mainMenuFunction, 
-      {MenuState::Settings, MenuState::TimerConfirm, MenuState::Vault}, MenuState::MainMenu },
+      {MenuState::TimerConfirm, MenuState::Settings, MenuState::Vault}, MenuState::MainMenu },
       
     // [Settings] -> Options: {"Volume", "Bright", "Back"}. Index 1 ("Bright") links straight to Focus config
     { settingsOpts, GET_SIZE(settingsOpts), &menu_manager::settingsFunction, 
@@ -159,9 +159,9 @@ void menu_manager::startupFunction() {
 }
 
 void menu_manager::mainMenuFunction() {
-
-    //Ändra Main Meny så att den är snygg <3<3<3
+    menuPositionManager();
     display.clearDisplay();
+    
     DisplayAsset activeMainMenuAsset1 = DisplayAsset::PlayIcon;
     DisplayAsset activeMainMenuAsset2 = DisplayAsset::SettingsIcon;
     DisplayAsset activeMainMenuAsset3 = DisplayAsset::VaultIcon;
@@ -169,27 +169,40 @@ void menu_manager::mainMenuFunction() {
     uint8_t posX = 48;
     uint8_t posY = 8;
 
-    //Play icon
+    // 1. Play icon
     if (mainMenuAssetInstance1.id != activeMainMenuAsset1) {
-        mainMenuAssetInstance1.changeAsset(activeMainMenuAsset1, posX, posY); //[cite: 5, 6]
+        mainMenuAssetInstance1.changeAsset(activeMainMenuAsset1, posX, posY);
     }
     drawDisplay(mainMenuAssetInstance1);
 
-    //Settings Icon. Denna visas inte
+    // 2. Settings Icon
     if (mainMenuAssetInstance2.id != activeMainMenuAsset2) {
-        mainMenuAssetInstance2.changeAsset(activeMainMenuAsset2, posX, posY * 3); //[cite: 5, 6]
+        mainMenuAssetInstance2.changeAsset(activeMainMenuAsset2, posX, posY * 3);
     }
     drawDisplay(mainMenuAssetInstance2);
 
-    //Vault Icon
+    // 3. Vault Icon
     if (mainMenuAssetInstance3.id != activeMainMenuAsset3) {
-        mainMenuAssetInstance3.changeAsset(activeMainMenuAsset3, posX, posY * 5); //[cite: 5, 6]
+        mainMenuAssetInstance3.changeAsset(activeMainMenuAsset3, posX, posY * 5);
     }
     drawDisplay(mainMenuAssetInstance3);
 
-    display.display(); //[cite: 5]
-}
+    // --- MARKERINGSLOGIK ---
+    // Räkna ut exakt var den valda ikonen ligger i Y-led
+    // Index 0 -> Y: 8, Index 1 -> Y: 24, Index 2 -> Y: 40
+    uint8_t selectedY = posY + (menuPosition * posY * 2);
 
+    // Rita en snygg "väljar-pil" (>) till vänster om den valda ikonen
+    display.setTextSize(1);
+    display.setTextColor(SSD1306_WHITE);
+    display.setCursor(posX - 16, selectedY + 4); // Sätter den 16 pixlar till vänster om ikonen
+    display.print(F(">"));
+
+    // ELLER: Rita en snygg rektangulär ram runt hela ikonen (om de är t.ex. 16x16 pixlar)
+    // display.drawRoundRect(posX - 2, selectedY - 2, 20, 20, 3, SSD1306_WHITE);
+
+    display.display();
+}
 void menu_manager::settingsFunction() {
     display.clearDisplay();
     display.setTextSize(1); 

@@ -175,13 +175,15 @@ AssetData BitmapBank::getAsset(DisplayAsset id) {
         case DisplayAsset::HeartIcon:   return { asset_Heart,     1, 0,  16,  16 };
         case DisplayAsset::CoinAnim:    return { asset_Coin,      4, 12, 8,   8  };
 
+        //Side assets
         case DisplayAsset::Geyser:      return {asset_Geyser,     1,0, 16,64};
         case DisplayAsset::Kelp:        return {asset_Kelp,       2, 1,  16,  64 };
         case DisplayAsset::Seaweed:     return {asset_Seaweed,    2, 1,  16,  64 };
 
-        case DisplayAsset::VaultIcon: return   {asset_VaultIcon,  1, 0, 32, 16};
-        case DisplayAsset::PlayIcon: return   {asset_playIcon,  1, 0, 32, 16};
-        case DisplayAsset::SettingsIcon: return   {asset_SettingsIcon,  1, 0, 32, 16};
+        //Main Menu Icons
+        case DisplayAsset::VaultIcon:   return {asset_VaultIcon,  1, 0, 32, 16};
+        case DisplayAsset::PlayIcon:    return {asset_playIcon,  1, 0, 32, 16};
+        case DisplayAsset::SettingsIcon:return {asset_SettingsIcon,  1, 0, 32, 16};
 
         
         default:                        return { nullptr, 0, 0, 0, 0 };
