@@ -159,7 +159,12 @@ const unsigned char* const asset_Kelp[]     PROGMEM = {epd_bitmap_kelp1, epd_bit
 const unsigned char* const asset_Seaweed[]   PROGMEM = {epd_bitmap_seaweed, epd_bitmap_seaweed2}; 
 const unsigned char* const asset_playIcon[]    PROGMEM = {epd_bitmap_PlayIcon};
 const unsigned char* const asset_SettingsIcon[]    PROGMEM = {epd_bitmap_SettingsIcon};
-const unsigned char* const asset_VaultIcon[]    PROGMEM = {epd_bitmap_VaultIcon}; 
+const unsigned char* const asset_VaultIcon[]    PROGMEM = {epd_bitmap_VaultIcon};
+
+const unsigned char* const asset_AnglerFish[]    PROGMEM = {angler_fish};
+const unsigned char* const asset_ClassicFish[]    PROGMEM = {epd_bitmap_classic_fish};
+const unsigned char* const asset_FrenchFish[]    PROGMEM = {epd_bitmap_French_Fish};
+ 
 
 // ==========================================
 // 3. THE UNIFIED LOOKUP (With Dimensions)
@@ -184,6 +189,12 @@ AssetData BitmapBank::getAsset(DisplayAsset id) {
         case DisplayAsset::VaultIcon:   return {asset_VaultIcon,  1, 0, 32, 16};
         case DisplayAsset::PlayIcon:    return {asset_playIcon,  1, 0, 32, 16};
         case DisplayAsset::SettingsIcon:return {asset_SettingsIcon,  1, 0, 32, 16};
+
+        //Fish
+        case DisplayAsset::AnglerFish: return {asset_AnglerFish, 1,0,24,24};
+        case DisplayAsset::FrenchFish: return {asset_FrenchFish, 1,0,24,24};
+        case DisplayAsset::ClassicFish: return {asset_ClassicFish, 1,0,24,24};
+        
 
         
         default:                        return { nullptr, 0, 0, 0, 0 };

@@ -14,7 +14,10 @@ enum class DisplayAsset {
     Seaweed,
     PlayIcon,
     SettingsIcon,
-    VaultIcon,      
+    VaultIcon,
+    AnglerFish,
+    FrenchFish,
+    ClassicFish,      
 };
 
 struct AssetData {

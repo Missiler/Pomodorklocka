@@ -147,7 +147,7 @@ void menu_manager::startupFunction() {
     const int maxStartupUpdates = 100;
     display.clearDisplay();
         if (coinInstance.id != DisplayAsset::CoinAnim) {
-        coinInstance.changeAsset(DisplayAsset::CoinAnim, 42, 24);
+        coinInstance.changeAsset(DisplayAsset::CoinAnim, 42, 24, false);
         }
     startupUpdateCount++;
     drawDisplay(coinInstance);
@@ -171,19 +171,19 @@ void menu_manager::mainMenuFunction() {
 
     // 1. Play icon
     if (mainMenuAssetInstance1.id != activeMainMenuAsset1) {
-        mainMenuAssetInstance1.changeAsset(activeMainMenuAsset1, posX, posY);
+        mainMenuAssetInstance1.changeAsset(activeMainMenuAsset1, posX, posY, false);
     }
     drawDisplay(mainMenuAssetInstance1);
 
     // 2. Settings Icon
     if (mainMenuAssetInstance2.id != activeMainMenuAsset2) {
-        mainMenuAssetInstance2.changeAsset(activeMainMenuAsset2, posX, posY * 3);
+        mainMenuAssetInstance2.changeAsset(activeMainMenuAsset2, posX, posY * 3, false);
     }
     drawDisplay(mainMenuAssetInstance2);
 
     // 3. Vault Icon
     if (mainMenuAssetInstance3.id != activeMainMenuAsset3) {
-        mainMenuAssetInstance3.changeAsset(activeMainMenuAsset3, posX, posY * 5);
+        mainMenuAssetInstance3.changeAsset(activeMainMenuAsset3, posX, posY * 5, false);
     }
     drawDisplay(mainMenuAssetInstance3);
 
@@ -202,8 +202,11 @@ void menu_manager::mainMenuFunction() {
     // display.drawRoundRect(posX - 2, selectedY - 2, 20, 20, 3, SSD1306_WHITE);
 
     display.display();
+
 }
+
 void menu_manager::settingsFunction() {
+
     display.clearDisplay();
     display.setTextSize(1); 
     selectionManager();
@@ -219,6 +222,8 @@ void menu_manager::runningFunction() {
     display.setCursor(0, 0);
     display.setTextSize(1);
     display.setTextColor(SSD1306_WHITE);
+
+
 
     //Actual running timer
     unsigned long currentMillis = millis();
@@ -244,7 +249,7 @@ void menu_manager::runningFunction() {
     int displaySeconds = remainingSeconds % 60;
 
     display.setTextSize(1);
-    display.setCursor(64, 0);
+    display.setCursor(45, 0);
     if (displayMinutes < 10) display.print(F("0"));
     display.print(displayMinutes);
     display.print(F(":"));
@@ -253,14 +258,28 @@ void menu_manager::runningFunction() {
     //----------------------------
 
     //Personalized: FIXA DENNA
-    DisplayAsset activeRunningAsset;
-    if (runningAssetInstance.id != activeRunningAsset) {
-    runningAssetInstance.changeAsset(activeRunningAsset, 0, 63); //[cite: 5, 6]
+    if (runningBigL.id != activeRunningBigL) {
+    runningBigL.changeAsset(activeRunningBigL, 0, 0, false); //[cite: 5, 6]
     }
+    drawDisplay(runningBigL);
 
-    drawDisplay(runningAssetInstance);
+    //Personalized: FIXA DENNA
+    if (runningBigR.id != activeRunningBigR) {
+    runningBigR.changeAsset(activeRunningBigR, 112, 0, false); //[cite: 5, 6]
+    }
+    drawDisplay(runningBigR);
 
+        if (runningLilR.id != activeRunningLilR) {
+    runningLilR.changeAsset(activeRunningLilR, 96, 0, false); //[cite: 5, 6]
+    }
+    drawDisplay(runningLilR);
 
+        if (runningLilL.id != activeRunningLilL) {
+    runningLilL.changeAsset(activeRunningLilL, 16, 0, false); //[cite: 5, 6]
+    }
+    drawDisplay(runningLilL);
+
+    fishSwim();
 
     display.display();
 }
@@ -291,7 +310,7 @@ void menu_manager::vaultFunction() {
 
     // 2. Manage the dedicated vault asset instance instead of coinInstance
     if (vaultAssetInstance.id != activeVaultAsset) {
-        vaultAssetInstance.changeAsset(activeVaultAsset, 0, 0); //[cite: 5, 6]
+        vaultAssetInstance.changeAsset(activeVaultAsset, 0, 0, false); //[cite: 5, 6]
     }
 
     // 3. Draw the vault-specific asset to the display buffer[cite: 5]
@@ -425,27 +444,147 @@ void menu_manager::buttonAction(uint8_t button) {
     }
 }
 
-//Animation or Images
-void menu_manager::drawDisplay(AnimationInstance& instance) {
-    // 1. Fetch asset details
-    AssetData asset = BitmapBank::getAsset(instance.id);
-    if (asset.frames == nullptr || asset.totalFrames == 0) return;
+void menu_manager::fishSwim() {
+    unsigned long currentMillis = millis();
 
-    // 2. Only advance frames if it's an animation (fps > 0)
-    if (asset.fps > 0) {
-        unsigned long frameInterval = 1000 / asset.fps;
-        unsigned long currentMillis = millis();
+    // Hämta tillgångar från din BitmapBank
+    DisplayAsset activeRunningFish1 = DisplayAsset::AnglerFish;
+    DisplayAsset activeRunningFish2 = DisplayAsset::ClassicFish;
+    DisplayAsset activeRunningFish3 = DisplayAsset::FrenchFish;
 
-        if (currentMillis - instance.lastFrameUpdateTime >= frameInterval) {
-            instance.lastFrameUpdateTime = currentMillis;
-            instance.currentFrameIndex = (instance.currentFrameIndex + 1) % asset.totalFrames;
+    // Bas-Y-koordinater (mittpunkten för vågrörelsen)
+    int baseY1 = 18;
+    int baseY2 = 32;
+    int baseY3 = 46;
+
+    // ==========================================
+    // FISK 1 (Angler Fish)
+    // ==========================================
+    if (fish1_X < -24 || fish1_X > 128) { 
+        if (currentMillis >= nextFish1Time) {
+            fish1_facingRight = (random(0, 2) == 1); 
+            fish1_speed = 1; 
+
+            if (fish1_facingRight) {
+                fish1_X = -24; // Starta till vänster, simma höger
+            } else {
+                fish1_X = 128; // Starta till höger, simma vänster
+            }
+            nextFish1Time = currentMillis + random(4000, 10000); 
         }
     } else {
-        instance.currentFrameIndex = 0;
+        if (fish1_facingRight) fish1_X += fish1_speed; 
+        else fish1_X -= fish1_speed; 
     }
 
-    // 3. Render frame at specific coordinates using its own dimensions
-    const unsigned char* frameToDraw = (const unsigned char*)pgm_read_ptr(&(asset.frames[instance.currentFrameIndex]));
+    int calcY1 = baseY1 + (sin(fish1_X * 0.12) * 4.0);
+
+    // FIX: Lade till '!' före fish1_facingRight för att vända på spegelvändningen
+    if (runningFish1.id != activeRunningFish1 || runningFish1.x != fish1_X || runningFish1.y != calcY1 || runningFish1.mirror != !fish1_facingRight) {
+        runningFish1.changeAsset(activeRunningFish1, fish1_X, calcY1, !fish1_facingRight); 
+    }
+    if (fish1_X >= -24 && fish1_X <= 128) drawDisplay(runningFish1);
+
+
+    // ==========================================
+    // FISK 2 (Classic Fish)
+    // ==========================================
+    if (fish2_X < -24 || fish2_X > 128) {
+        if (currentMillis >= nextFish2Time) {
+            fish2_facingRight = (random(0, 2) == 1);
+            fish2_speed = 1; 
+
+            if (fish2_facingRight) fish2_X = -24;
+            else fish2_X = 128;
+
+            nextFish2Time = currentMillis + random(6000, 15000);
+        }
+    } else {
+        if ((currentMillis / 100) % 2 == 0) {
+            if (fish2_facingRight) fish2_X += fish2_speed;
+            else fish2_X -= fish2_speed;
+        }
+    }
+
+    int calcY2 = baseY2 + (sin(fish2_X * 0.08) * 5.0);
+
+    // FIX: Lade till '!' före fish2_facingRight
+    if (runningFish2.id != activeRunningFish2 || runningFish2.x != fish2_X || runningFish2.y != calcY2 || runningFish2.mirror != !fish2_facingRight) {
+        runningFish2.changeAsset(activeRunningFish2, fish2_X, calcY2, !fish2_facingRight); 
+    }
+    if (fish2_X >= -24 && fish2_X <= 128) drawDisplay(runningFish2);
+
+
+    // ==========================================
+    // FISK 3 (French Fish)
+    // ==========================================
+    if (fish3_X < -24 || fish3_X > 128) {
+        if (currentMillis >= nextFish3Time) {
+            fish3_facingRight = (random(0, 2) == 1);
+            fish3_speed = 1;
+
+            if (fish3_facingRight) fish3_X = -24;
+            else fish3_X = 128;
+
+            nextFish3Time = currentMillis + random(5000, 12000);
+        }
+    } else {
+        if (fish3_facingRight) fish3_X += fish3_speed;
+        else fish3_X -= fish3_speed;
+    }
+
+    int calcY3 = baseY3 + (sin(fish3_X * 0.2) * 3.0);
+
+    // FIX: Lade till '!' före fish3_facingRight
+    if (runningFish3.id != activeRunningFish3 || runningFish3.x != fish3_X || runningFish3.y != calcY3 || runningFish3.mirror != !fish3_facingRight) {
+        runningFish3.changeAsset(activeRunningFish3, fish3_X, calcY3, !fish3_facingRight); 
+    }
+    if (fish3_X >= -24 && fish3_X <= 128) drawDisplay(runningFish3); 
+}
+
+//Animation or Images
+void menu_manager::drawDisplay(AnimationInstance& instance) { //
+    // 1. Hämta asset-detaljer
+    AssetData asset = BitmapBank::getAsset(instance.id); //
+    if (asset.frames == nullptr || asset.totalFrames == 0) return; //
+
+    // 2. Hantera animeringstimer (om det finns flera frames)
+    if (asset.fps > 0) { //
+        unsigned long frameInterval = 1000 / asset.fps; //
+        unsigned long currentMillis = millis(); //
+
+        if (currentMillis - instance.lastFrameUpdateTime >= frameInterval) { //
+            instance.lastFrameUpdateTime = currentMillis; //
+            instance.currentFrameIndex = (instance.currentFrameIndex + 1) % asset.totalFrames; //
+        }
+    } else {
+        instance.currentFrameIndex = 0; //
+    }
+
+    // Hämta pekaren till nuvarande frame
+    const unsigned char* frameToDraw = (const unsigned char*)pgm_read_ptr(&(asset.frames[instance.currentFrameIndex])); //
     
-    display.drawBitmap(instance.x, instance.y, frameToDraw, asset.width, asset.height, SSD1306_WHITE);
+    // 3. RENDERINGS-LOGIK MED ÄKTA SPEGELVÄNDNING
+    if (instance.mirror) {
+        // Om mirror är true, ritar vi bitmappen pixel för pixel, men speglar X-axeln
+        int byteWidth = (asset.width + 7) / 8; // Hur många bytes per rad i bitmappen
+        
+        for (int y = 0; y < asset.height; y++) { //
+            for (int x = 0; x < asset.width; x++) { //
+                // Räkna ut exakt vilken bit i PROGMEM vi läser just nu
+                int byteIdx = y * byteWidth + (x / 8);
+                uint8_t byteVal = pgm_read_byte(frameToDraw + byteIdx); //
+                
+                // Kolla om pixeln är tänd (1) eller släckt (0)
+                if (byteVal & (128 >> (x % 8))) {
+                    // SPEGELVÄNDNINGEN: Rita pixeln på (bredd - 1 - x) istället för x!
+                    int mirroredX = instance.x + (asset.width - 1 - x);
+                    display.drawPixel(mirroredX, instance.y + y, SSD1306_WHITE); //
+                }
+            }
+        }
+    } else {
+        // Om mirror är false, använd Adafruits snabba standardfunktion
+        display.drawBitmap(instance.x, instance.y, frameToDraw, asset.width, asset.height, SSD1306_WHITE); //
+    }
 }

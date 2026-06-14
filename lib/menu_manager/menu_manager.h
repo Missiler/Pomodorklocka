@@ -59,18 +59,21 @@ class menu_manager {
             int currentFrameIndex = 0;
             int x = 0;
             int y = 0;
+            bool mirror = false; // <-- LÄGG TILL DENNA RAD!
 
             // Reset helper for when you switch assets on the fly
-            void changeAsset(DisplayAsset newId, int posX, int posY) {
+            void changeAsset(DisplayAsset newId, int posX, int posY, bool shouldMirror) {
                 id = newId;
                 x = posX;
                 y = posY;
                 currentFrameIndex = 0;
                 lastFrameUpdateTime = 0;
+                mirror = shouldMirror; // <-- LÄGG TILL DENNA RAD!
             }
         };
 
         void drawDisplay(AnimationInstance& instance);
+        void fishSwim();
 
     private:
         Adafruit_SSD1306 &display;
@@ -104,7 +107,40 @@ class menu_manager {
         menu_manager::AnimationInstance mainMenuAssetInstance2; // <-- ADD THIS LINE
         menu_manager::AnimationInstance mainMenuAssetInstance3; // <-- ADD THIS LINE
     
-        menu_manager::AnimationInstance runningAssetInstance;
+        menu_manager::AnimationInstance runningBigR;
+        menu_manager::AnimationInstance runningBigL;
+        menu_manager::AnimationInstance runningLilR;
+        menu_manager::AnimationInstance runningLilL;
+        menu_manager::AnimationInstance runningFish1;
+        menu_manager::AnimationInstance runningFish2;
+        menu_manager::AnimationInstance runningFish3;
+
+        DisplayAsset activeRunningBigL = DisplayAsset::Kelp;
+        DisplayAsset activeRunningBigR = DisplayAsset::Seaweed;
+        DisplayAsset activeRunningLilR = DisplayAsset::Geyser;
+        DisplayAsset activeRunningLilL = DisplayAsset::Geyser;
+
+        //Fiskar som simmar
+        DisplayAsset activeRunningFish1 = DisplayAsset::AnglerFish;
+        DisplayAsset activeRunningFish2 = DisplayAsset::ClassicFish;;
+        DisplayAsset activeRunningFish3 = DisplayAsset::FrenchFish;;  
+
+        int fish1_X = -25;
+        int fish2_X = -25;
+        int fish3_X = -25;
+        
+        unsigned long nextFish1Time = 0;
+        unsigned long nextFish2Time = 0;
+        unsigned long nextFish3Time = 0;
+        
+        int fish1_speed = 2;
+        int fish2_speed = 1;
+        int fish3_speed = 1;
+
+        bool fish1_facingRight = true;
+        bool fish2_facingRight = true;
+        bool fish3_facingRight = true;
+        
 };
 
 #endif
