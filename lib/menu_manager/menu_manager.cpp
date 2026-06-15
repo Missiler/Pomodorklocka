@@ -219,6 +219,9 @@ void menu_manager::settingsFunction() {
 void menu_manager::runningFunction() {
     //Basic information that will keep the timer going
     display.clearDisplay();
+
+    fishSwim();
+
     display.setCursor(0, 0);
     display.setTextSize(1);
     display.setTextColor(SSD1306_WHITE);
@@ -278,8 +281,6 @@ void menu_manager::runningFunction() {
     runningLilL.changeAsset(activeRunningLilL, 16, 0, false); //[cite: 5, 6]
     }
     drawDisplay(runningLilL);
-
-    fishSwim();
 
     display.display();
 }
@@ -444,102 +445,94 @@ void menu_manager::buttonAction(uint8_t button) {
     }
 }
 
+// --- FUNKTION FÖR ATT ÄNDRA EN EXISTERANDE FISK ---
+void menu_manager::setFish(int index, DisplayAsset asset, float density, float height) {
+    if (index < 0 || index >= MAX_FISHES) return;
+
+    aquarium[index].assetId = asset;
+    aquarium[index].waveDensity = density;
+    aquarium[index].waveHeight = height;
+    
+    // Standard-delays som funkar bra för alla
+    aquarium[index].minSpawnDelay = 3000;
+    aquarium[index].maxSpawnDelay = 10000;
+}
 void menu_manager::fishSwim() {
     unsigned long currentMillis = millis();
+    randomSeed(analogRead(A1));
 
-    // Hämta tillgångar från din BitmapBank
-    DisplayAsset activeRunningFish1 = DisplayAsset::AnglerFish;
-    DisplayAsset activeRunningFish2 = DisplayAsset::ClassicFish;
-    DisplayAsset activeRunningFish3 = DisplayAsset::FrenchFish;
+    // Sätt standard-fiskar allra första gången om arrayen är helt tom
+    if (!aquariumInitialized) {
+        setFish(0, DisplayAsset::AnglerFish,  0.12, 4.0);
+        setFish(1, DisplayAsset::ClassicFish, 0.08, 5.0);
+        setFish(2, DisplayAsset::FrenchFish,  0.20, 3.0);
+        
+        // --- RESPEKTERADE DELAYS ---
+        // Justera dessa fritt. 5-10 sekunder ger ett fint, naturligt flöde.
+        aquarium[0].minSpawnDelay = 4000; aquarium[0].maxSpawnDelay = 10000;  
+        aquarium[1].minSpawnDelay = 5000; aquarium[1].maxSpawnDelay = 8000;  
+        aquarium[2].minSpawnDelay = 3000; aquarium[2].maxSpawnDelay = 9000;  
 
-    // Bas-Y-koordinater (mittpunkten för vågrörelsen)
-    int baseY1 = 18;
-    int baseY2 = 32;
-    int baseY3 = 46;
+        for(int i = 0; i < MAX_FISHES; i++) {
+            // Sätt till ett djupt viloläge så de inte tjuvstartar
+            aquarium[i].x = -100; 
+            aquarium[i].speed = 1;
+            
+            // Sprid ut första startskottet i tid
+            aquarium[i].nextSpawnTime = currentMillis + (i * 2000);
+            aquarium[i].baseY = 10 + (i * 10); 
+        }
+        aquariumInitialized = true;
+    }
 
-    // ==========================================
-    // FISK 1 (Angler Fish)
-    // ==========================================
-    if (fish1_X < -24 || fish1_X > 128) { 
-        if (currentMillis >= nextFish1Time) {
-            fish1_facingRight = (random(0, 2) == 1); 
-            fish1_speed = 1; 
+    // Loopa igenom alla fasta slots
+    for (int i = 0; i < MAX_FISHES; i++) {
+        
+        // FIX: Ändrat villkor. Om fisken är i viloläge (-100), vänta ut timern
+        if (aquarium[i].x == -100) {
+            if (currentMillis >= aquarium[i].nextSpawnTime) {
+                aquarium[i].facingRight = (random(0, 2) == 1);
+                aquarium[i].speed = 1;
 
-            if (fish1_facingRight) {
-                fish1_X = -24; // Starta till vänster, simma höger
-            } else {
-                fish1_X = 128; // Starta till höger, simma vänster
+                // SEPARATION PÅ OLIKA NIVÅER
+                if (i == 0)      aquarium[i].baseY = random(6, 16);   
+                else if (i == 1) aquarium[i].baseY = random(20, 26);  
+                else if (i == 2) aquarium[i].baseY = random(34, 40);  
+
+
+                if (aquarium[i].facingRight) aquarium[i].x = -24;
+                else aquarium[i].x = 128;
             }
-            nextFish1Time = currentMillis + random(4000, 10000); 
+        } else {
+            // RÖRELSE
+            if (aquarium[i].facingRight) aquarium[i].x += aquarium[i].speed;
+            else aquarium[i].x -= aquarium[i].speed;
+
+            // FIX: När fisken simmar ut, kasta in den i viloläget (-100) 
+            // och sätt den FRAMTIDA spawntiden härifrån!
+            if (aquarium[i].x < -24 || aquarium[i].x > 128) {
+                aquarium[i].x = -100; 
+                aquarium[i].nextSpawnTime = currentMillis + random(aquarium[i].minSpawnDelay, aquarium[i].maxSpawnDelay);
+            }
         }
-    } else {
-        if (fish1_facingRight) fish1_X += fish1_speed; 
-        else fish1_X -= fish1_speed; 
-    }
 
-    int calcY1 = baseY1 + (sin(fish1_X * 0.12) * 4.0);
+        // RENDERING (Rita bara om den faktiskt är på skärmen)
+        if (aquarium[i].x >= -24 && aquarium[i].x <= 128) {
+            int calcY = aquarium[i].baseY + (sin(aquarium[i].x * aquarium[i].waveDensity) * aquarium[i].waveHeight);
+            
+            if (calcY < 0) calcY = 0;
+            if (calcY > 44) calcY = 44;
 
-    // FIX: Lade till '!' före fish1_facingRight för att vända på spegelvändningen
-    if (runningFish1.id != activeRunningFish1 || runningFish1.x != fish1_X || runningFish1.y != calcY1 || runningFish1.mirror != !fish1_facingRight) {
-        runningFish1.changeAsset(activeRunningFish1, fish1_X, calcY1, !fish1_facingRight); 
-    }
-    if (fish1_X >= -24 && fish1_X <= 128) drawDisplay(runningFish1);
-
-
-    // ==========================================
-    // FISK 2 (Classic Fish)
-    // ==========================================
-    if (fish2_X < -24 || fish2_X > 128) {
-        if (currentMillis >= nextFish2Time) {
-            fish2_facingRight = (random(0, 2) == 1);
-            fish2_speed = 1; 
-
-            if (fish2_facingRight) fish2_X = -24;
-            else fish2_X = 128;
-
-            nextFish2Time = currentMillis + random(6000, 15000);
-        }
-    } else {
-        if ((currentMillis / 100) % 2 == 0) {
-            if (fish2_facingRight) fish2_X += fish2_speed;
-            else fish2_X -= fish2_speed;
+            if (aquarium[i].instance.id != aquarium[i].assetId || 
+                aquarium[i].instance.x != aquarium[i].x || 
+                aquarium[i].instance.y != calcY || 
+                aquarium[i].instance.mirror != !aquarium[i].facingRight) 
+            {
+                aquarium[i].instance.changeAsset(aquarium[i].assetId, aquarium[i].x, calcY, !aquarium[i].facingRight);
+            }
+            drawDisplay(aquarium[i].instance);
         }
     }
-
-    int calcY2 = baseY2 + (sin(fish2_X * 0.08) * 5.0);
-
-    // FIX: Lade till '!' före fish2_facingRight
-    if (runningFish2.id != activeRunningFish2 || runningFish2.x != fish2_X || runningFish2.y != calcY2 || runningFish2.mirror != !fish2_facingRight) {
-        runningFish2.changeAsset(activeRunningFish2, fish2_X, calcY2, !fish2_facingRight); 
-    }
-    if (fish2_X >= -24 && fish2_X <= 128) drawDisplay(runningFish2);
-
-
-    // ==========================================
-    // FISK 3 (French Fish)
-    // ==========================================
-    if (fish3_X < -24 || fish3_X > 128) {
-        if (currentMillis >= nextFish3Time) {
-            fish3_facingRight = (random(0, 2) == 1);
-            fish3_speed = 1;
-
-            if (fish3_facingRight) fish3_X = -24;
-            else fish3_X = 128;
-
-            nextFish3Time = currentMillis + random(5000, 12000);
-        }
-    } else {
-        if (fish3_facingRight) fish3_X += fish3_speed;
-        else fish3_X -= fish3_speed;
-    }
-
-    int calcY3 = baseY3 + (sin(fish3_X * 0.2) * 3.0);
-
-    // FIX: Lade till '!' före fish3_facingRight
-    if (runningFish3.id != activeRunningFish3 || runningFish3.x != fish3_X || runningFish3.y != calcY3 || runningFish3.mirror != !fish3_facingRight) {
-        runningFish3.changeAsset(activeRunningFish3, fish3_X, calcY3, !fish3_facingRight); 
-    }
-    if (fish3_X >= -24 && fish3_X <= 128) drawDisplay(runningFish3); 
 }
 
 //Animation or Images
@@ -585,6 +578,7 @@ void menu_manager::drawDisplay(AnimationInstance& instance) { //
         }
     } else {
         // Om mirror är false, använd Adafruits snabba standardfunktion
+        // Genom att lägga till SSD1306_BLACK blir tillgången solid och döljer allt bakom sig!
         display.drawBitmap(instance.x, instance.y, frameToDraw, asset.width, asset.height, SSD1306_WHITE); //
     }
 }

@@ -9,15 +9,26 @@ enum class DisplayAsset {
     LoadingAnim,
     HeartIcon,    // New small static asset
     CoinAnim,      // New small animated asset
+
+    //Big RL
     Geyser,
     Kelp,              
     Seaweed,
+
+    //Icons
     PlayIcon,
     SettingsIcon,
     VaultIcon,
+
+    //Fish
     AnglerFish,
     FrenchFish,
-    ClassicFish,      
+    ClassicFish,
+
+    //Small RL
+    SmallBuske,
+    SmallKorall,
+    Sjogurka,
 };
 
 struct AssetData {

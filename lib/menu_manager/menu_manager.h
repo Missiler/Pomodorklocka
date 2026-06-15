@@ -28,7 +28,16 @@ class menu_manager {
             TimerChange,     // Row 1: Focus Time adjustment
             BreakTimeChange, // Row 2: Break Time adjustment
             TimerConfirm,    // Summary/Confirmation View Screen
-            Count
+            Count,
+
+            //Library States.
+            LibraryOverview,
+            ChooseBigSide,
+            ChooseSmallSide,
+            ChooseGround,
+            ChooseFishes,
+
+
         };
         
         // Bundles everything unique to a menu view
@@ -73,6 +82,27 @@ class menu_manager {
         };
 
         void drawDisplay(AnimationInstance& instance);
+        static const int MAX_FISHES = 3; // Vi sätter ett fast antal fisk-slots vi kan styra
+        struct FishData {
+            menu_manager::AnimationInstance instance;
+            DisplayAsset assetId;
+            int x;
+            int y;
+            int baseY;
+            int speed;
+            bool facingRight;
+            unsigned long nextSpawnTime;
+            float waveDensity;
+            float waveHeight;
+            int minSpawnDelay;
+            int maxSpawnDelay;
+        };
+
+        // Ändra egenskaperna på en specifik fisk (0 till MAX_FISHES - 1)
+        void setFish(int index, DisplayAsset asset, float density, float height);
+        
+        // Den nya menyfunktionen för att ändra fiskar
+        void fishConfigMenuFunction();
         void fishSwim();
 
     private:
@@ -122,8 +152,12 @@ class menu_manager {
 
         //Fiskar som simmar
         DisplayAsset activeRunningFish1 = DisplayAsset::AnglerFish;
-        DisplayAsset activeRunningFish2 = DisplayAsset::ClassicFish;;
-        DisplayAsset activeRunningFish3 = DisplayAsset::FrenchFish;;  
+        DisplayAsset activeRunningFish2 = DisplayAsset::ClassicFish;
+        DisplayAsset activeRunningFish3 = DisplayAsset::FrenchFish;
+
+        FishData aquarium[MAX_FISHES];
+        int selectedFishIndex = 0; // Vilken fisk-slot (0-3) vi pillar på i menyn
+        bool aquariumInitialized = false;
 
         int fish1_X = -25;
         int fish2_X = -25;
