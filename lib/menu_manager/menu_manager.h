@@ -145,10 +145,10 @@ class menu_manager {
         menu_manager::AnimationInstance runningFish2;
         menu_manager::AnimationInstance runningFish3;
 
-        DisplayAsset activeRunningBigL = DisplayAsset::Kelp;
+        DisplayAsset activeRunningBigL = DisplayAsset::Geyser;
         DisplayAsset activeRunningBigR = DisplayAsset::Seaweed;
-        DisplayAsset activeRunningLilR = DisplayAsset::Geyser;
-        DisplayAsset activeRunningLilL = DisplayAsset::Geyser;
+        DisplayAsset activeRunningLilR = DisplayAsset::Sjogurka;
+        DisplayAsset activeRunningLilL = DisplayAsset::SmallKorall;
 
         //Fiskar som simmar
         DisplayAsset activeRunningFish1 = DisplayAsset::AnglerFish;

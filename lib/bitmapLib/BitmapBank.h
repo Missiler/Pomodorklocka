@@ -14,6 +14,12 @@ enum class DisplayAsset {
     Geyser,
     Kelp,              
     Seaweed,
+    BigFrame,
+    Hook,
+    KelpV2,
+    SeaweedV2,
+    
+
 
     //Icons
     PlayIcon,
@@ -24,11 +30,22 @@ enum class DisplayAsset {
     AnglerFish,
     FrenchFish,
     ClassicFish,
+    FishFrame,
+    BlueFish,
+    Manet,
+    SmolFish,
+    UpsideDownFish,
+    Turt,
 
     //Small RL
     SmallBuske,
     SmallKorall,
     Sjogurka,
+    SmallKelp,
+    SmallTree,
+    SmallKorallV2,
+    SmallBlomma,
+    SmallFrame,
 };
 
 struct AssetData {

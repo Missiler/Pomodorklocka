@@ -273,12 +273,12 @@ void menu_manager::runningFunction() {
     drawDisplay(runningBigR);
 
         if (runningLilR.id != activeRunningLilR) {
-    runningLilR.changeAsset(activeRunningLilR, 96, 0, false); //[cite: 5, 6]
+    runningLilR.changeAsset(activeRunningLilR, 96, 48, false); //[cite: 5, 6]
     }
     drawDisplay(runningLilR);
 
         if (runningLilL.id != activeRunningLilL) {
-    runningLilL.changeAsset(activeRunningLilL, 16, 0, false); //[cite: 5, 6]
+    runningLilL.changeAsset(activeRunningLilL, 16, 48, false); //[cite: 5, 6]
     }
     drawDisplay(runningLilL);
 
