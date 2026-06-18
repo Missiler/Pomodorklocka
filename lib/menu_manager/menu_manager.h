@@ -28,10 +28,8 @@ class menu_manager {
             TimerChange,     // Row 1: Focus Time adjustment
             BreakTimeChange, // Row 2: Break Time adjustment
             TimerConfirm,    // Summary/Confirmation View Screen
-            Count,
 
             //Library States.
-            LibraryOverview,
             ChooseBigSide,
             ChooseSmallSide,
             ChooseGround,
@@ -45,7 +43,7 @@ class menu_manager {
             const char** options;      // Pointer to its specific string array
             size_t numOptions;         // How many items are in that array
             void (menu_manager::*renderFunc)(); // Pointer to its unique class layout method
-            MenuState button1Targets[3]; // State to transition to if button 1 is pressed on index 0, 1, or 2
+            MenuState button1Targets[7]; // State to transition to if button 1 is pressed on index 0, 1, or 2
             MenuState button2Target;    // Back button behavior state
         };
 
@@ -105,6 +103,12 @@ class menu_manager {
         void fishConfigMenuFunction();
         void fishSwim();
 
+        void renderAssets();
+        void placeAsset(AnimationInstance& instance, DisplayAsset& asset, int posX, int posY, bool faceRight);
+        void changeBigSideFunction();
+        void changesmallSideFunction();
+        void changeFishFunction();
+
     private:
         Adafruit_SSD1306 &display;
         int updateNumber = 0;       
@@ -112,6 +116,18 @@ class menu_manager {
         int menuPosition = 0; // Changed to int to match discrete array options
         MenuState currentState = MenuState::Startup;
         volatile MenuState nextState = MenuState::Startup;
+        
+        //Placements for the stationary Assets:
+        int lilRposX = 96;
+        int lilRpoY = 48;
+        int lilLPosX = 16;
+        int lilLPosY = 48;
+
+        int bigRposY = 0;
+        int bigRPosX = 112;
+        int bigLposY = 0;
+        int bigLPosX = 0;
+
 
         // Configuration table instance array
         static const StateConfig stateTable[];
@@ -145,6 +161,7 @@ class menu_manager {
         menu_manager::AnimationInstance runningFish2;
         menu_manager::AnimationInstance runningFish3;
 
+        //Default på sidorna
         DisplayAsset activeRunningBigL = DisplayAsset::Geyser;
         DisplayAsset activeRunningBigR = DisplayAsset::Seaweed;
         DisplayAsset activeRunningLilR = DisplayAsset::Sjogurka;
@@ -154,6 +171,23 @@ class menu_manager {
         DisplayAsset activeRunningFish1 = DisplayAsset::AnglerFish;
         DisplayAsset activeRunningFish2 = DisplayAsset::ClassicFish;
         DisplayAsset activeRunningFish3 = DisplayAsset::FrenchFish;
+
+        //Vi vill nu ha assets för att kunna edita!
+        menu_manager::AnimationInstance vaultSideFrameLInstance;
+        menu_manager::AnimationInstance vaultSideFrameRInstance;
+        menu_manager::AnimationInstance vaultSmallFrameRInstance;
+        menu_manager::AnimationInstance vaultSmallFrameLInstance;
+        menu_manager::AnimationInstance vaultFish1Instance;
+        menu_manager::AnimationInstance vaultFish2Instance;
+        menu_manager::AnimationInstance vaultFish3Instance;
+
+        DisplayAsset vaultSideFrameL = DisplayAsset::BigFrame;
+        DisplayAsset vaultSideFrameR = DisplayAsset::BigFrame;
+        DisplayAsset vaultSideSmallFrameR = DisplayAsset::SmallFrame;
+        DisplayAsset vaultSideSmallFrameL = DisplayAsset::SmallFrame;
+        DisplayAsset vaultFish1 = DisplayAsset::FishFrame;
+        DisplayAsset vaultFish2 = DisplayAsset::FishFrame;
+        DisplayAsset vaultFish3 = DisplayAsset::FishFrame;
 
         FishData aquarium[MAX_FISHES];
         int selectedFishIndex = 0; // Vilken fisk-slot (0-3) vi pillar på i menyn
@@ -174,7 +208,14 @@ class menu_manager {
         bool fish1_facingRight = true;
         bool fish2_facingRight = true;
         bool fish3_facingRight = true;
-        
+
+        bool selectedBigR = false;
+        bool selectedSmallR = false;
+        bool selectedFish = 0;
+
+        int vaultSelectedPosX[7] = {0, 1,2, 3, 4, 5, 6};
+        int vaultSelectedPosY[7]  = {0,1,2,3,4,5,6};
+
 };
 
 #endif

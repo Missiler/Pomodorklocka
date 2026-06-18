@@ -32,8 +32,8 @@ const menu_manager::StateConfig menu_manager::stateTable[] = {
       
     // [Vault]
     { nullptr, 0, &menu_manager::vaultFunction, 
-      {MenuState::MainMenu, MenuState::MainMenu, MenuState::MainMenu}, MenuState::MainMenu },
-      
+      {MenuState::ChooseBigSide, MenuState::ChooseSmallSide, MenuState::ChooseFishes,MenuState::ChooseFishes,MenuState::ChooseFishes,MenuState::ChooseSmallSide,MenuState::ChooseBigSide}, MenuState::MainMenu },
+
     // [Running]
     { runningOpts, GET_SIZE(runningOpts), &menu_manager::runningFunction, 
       {MenuState::MainMenu, MenuState::Finished, MenuState::MainMenu}, MenuState::MainMenu },
@@ -60,7 +60,21 @@ const menu_manager::StateConfig menu_manager::stateTable[] = {
 
     // [TimerConfirm] -> Summary overview shown when 'Start' is hit from Main Menu. Routes to active run
     { nullptr, 0, &menu_manager::timerConfirmFunction, 
-      {MenuState::Running, MenuState::Running, MenuState::Running}, MenuState::MainMenu }
+      {MenuState::Running, MenuState::Running, MenuState::Running}, MenuState::MainMenu },
+
+// [ChooseBigSide] -> Index 11
+    { nullptr, 0, &menu_manager::changeBigSideFunction, 
+        {MenuState::Vault, MenuState::Vault, MenuState::Vault, MenuState::Vault, MenuState::Vault, MenuState::Vault, MenuState::Vault}, MenuState::Vault },
+        
+    // [ChooseSmallSide] -> Index 12
+    { nullptr, 0, &menu_manager::changesmallSideFunction, 
+        {MenuState::Vault, MenuState::Vault, MenuState::Vault, MenuState::Vault, MenuState::Vault, MenuState::Vault, MenuState::Vault}, MenuState::Vault },
+    // [ChooseGround] -> Index 13
+        { nullptr, 0, nullptr, 
+            {MenuState::Vault, MenuState::Vault, MenuState::Vault, MenuState::Vault, MenuState::Vault, MenuState::Vault, MenuState::Vault}, MenuState::Vault },        
+    // [ChooseFishes] -> Index 14
+    { nullptr, 0, &menu_manager::changeFishFunction, 
+        {MenuState::Vault, MenuState::Vault, MenuState::Vault, MenuState::Vault, MenuState::Vault, MenuState::Vault, MenuState::Vault}, MenuState::Vault }
 };
 
 menu_manager::menu_manager(Adafruit_SSD1306 &displayRef) : display(displayRef) {
@@ -219,8 +233,7 @@ void menu_manager::settingsFunction() {
 void menu_manager::runningFunction() {
     //Basic information that will keep the timer going
     display.clearDisplay();
-
-    fishSwim();
+    renderAssets();
 
     display.setCursor(0, 0);
     display.setTextSize(1);
@@ -259,29 +272,6 @@ void menu_manager::runningFunction() {
     if (displaySeconds < 10) display.print(F("0"));
     display.print(displaySeconds);
     //----------------------------
-
-    //Personalized: FIXA DENNA
-    if (runningBigL.id != activeRunningBigL) {
-    runningBigL.changeAsset(activeRunningBigL, 0, 0, false); //[cite: 5, 6]
-    }
-    drawDisplay(runningBigL);
-
-    //Personalized: FIXA DENNA
-    if (runningBigR.id != activeRunningBigR) {
-    runningBigR.changeAsset(activeRunningBigR, 112, 0, false); //[cite: 5, 6]
-    }
-    drawDisplay(runningBigR);
-
-        if (runningLilR.id != activeRunningLilR) {
-    runningLilR.changeAsset(activeRunningLilR, 96, 48, false); //[cite: 5, 6]
-    }
-    drawDisplay(runningLilR);
-
-        if (runningLilL.id != activeRunningLilL) {
-    runningLilL.changeAsset(activeRunningLilL, 16, 48, false); //[cite: 5, 6]
-    }
-    drawDisplay(runningLilL);
-
     display.display();
 }
 
@@ -295,36 +285,33 @@ void menu_manager::finishedFunction() {
     display.display();
 }
 //Placeholder
-
+//Vault and change assets:
 void menu_manager::vaultFunction() {
     display.clearDisplay(); //[cite: 5]
+    // int choice = map(potentioValue_raw, 0, 1024, 0, 7); //[cite: 5]
+    renderAssets();
+    selectionManager();
 
-    // 1. Map the potentiometer to choose between your 5 underwater assets[cite: 5, 7]
-    int choice = map(potentioValue_raw, 0, 1024, 0, 3); //[cite: 5]
-    DisplayAsset activeVaultAsset;
-
-    switch(choice) {
-        case 0:  activeVaultAsset = DisplayAsset::Geyser;   break;
-        case 1:  activeVaultAsset = DisplayAsset::Kelp;    break;
-        case 2:  activeVaultAsset = DisplayAsset::Seaweed;  break;
-    }
-
-    // 2. Manage the dedicated vault asset instance instead of coinInstance
-    if (vaultAssetInstance.id != activeVaultAsset) {
-        vaultAssetInstance.changeAsset(activeVaultAsset, 0, 0, false); //[cite: 5, 6]
-    }
-
-    // 3. Draw the vault-specific asset to the display buffer[cite: 5]
-    drawDisplay(vaultAssetInstance); //[cite: 5]
-
-    // 4. Print your coin text on the right side of the screen[cite: 5]
-    display.setTextSize(1); //[cite: 5]
-    display.setTextColor(SSD1306_WHITE); //[cite: 5]
-    display.setCursor(32, 28); // Shipped right to avoid overlapping the 16px wide asset[cite: 5]
-    display.print(F("x 150 Coins")); //[cite: 5]
-    
     display.display(); //[cite: 5]
 }
+
+void menu_manager::changeBigSideFunction(){
+    display.clearDisplay();
+    renderAssets();
+    display.display();
+}
+
+void menu_manager::changesmallSideFunction(){ // Match the lowercase 's' from your header
+    display.clearDisplay();
+    renderAssets();
+    display.display();
+}   
+void menu_manager::changeFishFunction(){
+    display.clearDisplay();
+    renderAssets();
+    display.display();
+}
+
 
 //Håller koll på positionen. Antagligen kommer denna tags bort för custom istället.
 void menu_manager::menuPositionManager() {
@@ -392,7 +379,10 @@ void menu_manager::update(unsigned long currentMillis, int potVal) {
     currentState = nextState;
 
     size_t stateIdx = static_cast<size_t>(currentState);
-    if (stateIdx >= static_cast<size_t>(MenuState::Count)) return;
+    
+    // Räkna ut max antal stater baserat på hur många rader stateTable faktiskt har
+    size_t maxStates = sizeof(stateTable) / sizeof(stateTable[0]);
+    if (stateIdx >= maxStates) return;
 
     if (stateTable[stateIdx].renderFunc != nullptr) {
         (this->*stateTable[stateIdx].renderFunc)();
@@ -400,7 +390,6 @@ void menu_manager::update(unsigned long currentMillis, int potVal) {
         if (currentState == MenuState::VolumeChange) genericSubmenuFunction("Volume");
     }
 }
-
 
 //Det som händer när man trycker på en knapp
 void menu_manager::buttonAction(uint8_t button) {
@@ -422,21 +411,32 @@ void menu_manager::buttonAction(uint8_t button) {
     // --- INTERCEPT CONFIRMATION ACTION TO CAPTURE RUNTIME PARAMS ---
     if (currentState == MenuState::TimerConfirm) {
         if (button == 1) {
-            // Button 1 confirms! Lock custom user values directly into the active tracking register fields
             remainingSeconds = configuredWorkSeconds; 
             timerLastMillis = millis();
-            nextState = MenuState::Running; // Go to focus countdown loop
+            nextState = MenuState::Running; 
         }
         else if (button == 2) {
-            nextState = MenuState::MainMenu; // Cancel out to home screen
+            nextState = MenuState::MainMenu; 
         }
         return;
     }
 
     // --- GENERIC RADIAL MENU CONTROLS ENGINE ---
-    //Väljer index för menyn. Detta är rätt snyggt ngl
     if (button == 1) {
-        if (menuPosition >= 0 && menuPosition < 3) {
+        if (currentState == MenuState::Vault) {
+            // Om man har 7 val, sträcker sig menuPosition från 0 till 6.
+            // (Om du vill ha max 8 val ändrar du bara till < 8)
+            if (menuPosition >= 0 && menuPosition < 7) {
+                // Hämtar målet dynamiskt från din statetabell för Vault
+                selectedBigR = (menuPosition == 0);
+                selectedSmallR = (menuPosition == 1);
+                selectedFish = menuPosition;
+
+                nextState = stateTable[stateIdx].button1Targets[menuPosition];
+            }
+        }
+        // FIX: Ändrat till 'else if' istället för bara 'else' för att villkoret ska gälla
+        else if (menuPosition >= 0 && menuPosition < 3) {
             nextState = stateTable[stateIdx].button1Targets[menuPosition];
         }
     } 
@@ -444,7 +444,6 @@ void menu_manager::buttonAction(uint8_t button) {
         nextState = stateTable[stateIdx].button2Target;
     }
 }
-
 // --- FUNKTION FÖR ATT ÄNDRA EN EXISTERANDE FISK ---
 void menu_manager::setFish(int index, DisplayAsset asset, float density, float height) {
     if (index < 0 || index >= MAX_FISHES) return;
@@ -535,7 +534,57 @@ void menu_manager::fishSwim() {
     }
 }
 
+void menu_manager::renderAssets(){
+    //Denna täcker både Vault och Running, men båda states har olika också.
+    if(currentState == MenuState::Vault || currentState == MenuState::Running){
+
+    placeAsset(runningBigR,activeRunningBigR,bigRPosX,bigRposY,false);
+    placeAsset(runningBigL, activeRunningBigL,bigLPosX,bigLposY, false);
+    placeAsset(runningLilR, activeRunningLilR, lilRposX, lilRpoY, false);
+    placeAsset(runningLilL, activeRunningLilL, lilLPosX,lilLPosY, false);
+
+    if(currentState == MenuState::Vault){
+        //Frame the assets
+        int currentSelection = map(potentioValue_raw, 0, 1024, 0, 7);
+        placeAsset(vaultSideFrameLInstance,vaultSideFrameL,bigLPosX, bigLposY, false);
+        placeAsset(vaultSideFrameRInstance,vaultSideFrameR,bigRPosX, bigRposY, false);
+        placeAsset(vaultSmallFrameLInstance, vaultSideSmallFrameL, lilLPosX,lilLPosY, false);
+        placeAsset(vaultSmallFrameRInstance, vaultSideSmallFrameR, lilRposX,lilRpoY, false);
+        
+        //Frame The Fishes
+        placeAsset(vaultFish1Instance, vaultFish1, 26,8,false);
+        placeAsset(vaultFish2Instance, vaultFish2, 52,8,false);
+        placeAsset(vaultFish3Instance, vaultFish3, 78,8,false);
+        placeAsset(runningFish1, activeRunningFish1, 26, 8, false);
+        placeAsset(runningFish2, activeRunningFish2, 52, 8, false);
+        placeAsset(runningFish3, activeRunningFish3, 78, 8, false);
+
+        display.setCursor(vaultSelectedPosX[currentSelection], vaultSelectedPosY[currentSelection]);
+        display.print(">");
+    }
+
+    if(currentState == MenuState::Running){
+        fishSwim();
+    }
+    }
+    if(currentState == MenuState::ChooseBigSide){
+        placeAsset(runningFish1, activeRunningFish1, 26, 8, false);
+    }
+    if(currentState == MenuState::ChooseSmallSide){
+        placeAsset(runningFish1, activeRunningFish1, 26, 8, false);
+    }
+    if(currentState == MenuState::ChooseFishes){
+        placeAsset(runningFish1, activeRunningFish1, 26, 8, false);
+    }
+}
+
 //Animation or Images
+void menu_manager::placeAsset(AnimationInstance& instance, DisplayAsset& asset, int posX, int posY, bool faceRight){
+    if(instance.id != asset){
+        instance.changeAsset(asset, posX, posY, faceRight);
+    }
+    drawDisplay(instance);
+}
 void menu_manager::drawDisplay(AnimationInstance& instance) { //
     // 1. Hämta asset-detaljer
     AssetData asset = BitmapBank::getAsset(instance.id); //
